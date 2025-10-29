@@ -2,14 +2,14 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
 WORKDIR /app
 EXPOSE 80
 
-RUN apk add --no-cache icu-libs=74.1-r1
+RUN apk add --no-cache icu-libs=76.1-r1
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV ASPNETCORE_URLS=http://+:80
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
 
-RUN apk add --no-cache icu-libs=74.1-r1
+RUN apk add --no-cache icu-libs=76.1-r1
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 COPY nuget.config ./
