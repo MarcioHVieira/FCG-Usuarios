@@ -25,8 +25,7 @@ steps:
         az container delete \
           --resource-group FCG-RG \
           --name usuarios-development \
-          --yes \
-          --no-wait
+          --yes
 
         # Criar novo container com a imagem recebida
         az container create \
