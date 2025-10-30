@@ -33,7 +33,7 @@ steps:
           --resource-group FCG-RG \
           --name usuarios-development \
           --image fcgcr.azurecr.io/fcgcr-repo:${{ parameters.imageTag }} \
-          --dns-name-label usuarios-development \
+          --dns-name-label usuarios-development-$(Build.BuildId) \
           --ports 80 \
           --location eastus \
           --os-type Linux \
@@ -59,9 +59,15 @@ steps:
               Logging__LogLevel__Default="${LOG_DEFAULT}" \
               Logging__LogLevel__Microsoft="${LOG_MICROSOFT}" \
               Logging__LogLevel__Microsoft_ApplicationInsights="${LOG_MICROSOFT_AI}" \
-              Logging__LogLevel__Microsoft_Hosting_Lifetime="${LOG_MICROSOFT_LIFETIME}"
+              Logging__LogLevel__Microsoft_Hosting_Lifetime="${LOG_MICROSOFT_LIFETIME}" \
+          --output json
 
-        echo "Container 'usuarios-development' publicado com sucesso no ACI!"
+        echo "Verificando se o container foi criado..."
+        az container show \
+          --resource-group FCG-RG \
+          --name usuarios-development \
+          --query "{name:name, state:instanceView.state}" \
+          --output json
     env:
       ACR_USERNAME: $(acrUsername)
       ACR_PASSWORD: $(acrPassword)
@@ -81,17 +87,3 @@ steps:
       LOG_MICROSOFT: $(Logging__LogLevel__Microsoft)
       LOG_MICROSOFT_AI: $(Logging__LogLevel__Microsoft.ApplicationInsights)
       LOG_MICROSOFT_LIFETIME: $(Logging__LogLevel__Microsoft.Hosting.Lifetime)
-
-  - task: AzureCLI@2
-    displayName: Verificar status do container
-    inputs:
-      azureSubscription: 'fcgrm-connection'
-      scriptType: bash
-      scriptLocation: inlineScript
-      inlineScript: |
-        echo "Consultando status da instância 'usuarios-development'..."
-        az container show \
-          --resource-group FCG-RG \
-          --name usuarios-development \
-          --query "instanceView.state" \
-          --output tsv
