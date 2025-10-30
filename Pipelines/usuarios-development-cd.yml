@@ -6,7 +6,7 @@ parameters:
     default: 'Usuarios-Development-latest'
 
 variables:
-  - group: Usuários
+  - group: Usuarios
 
 pool:
   vmImage: 'ubuntu-latest'
