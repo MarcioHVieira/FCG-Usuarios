@@ -23,14 +23,14 @@ steps:
 
         # Remover container anterior, se existir
         az container delete \
-          --resource-group fcg \
+          --resource-group FCG-RG \
           --name usuarios-development \
           --yes \
           --no-wait
 
         # Criar novo container com a imagem recebida
         az container create \
-          --resource-group fcg \
+          --resource-group FCG-RG \
           --name usuarios-development \
           --image fcgcr.azurecr.io/fcgcr-repo:${{ parameters.imageTag }} \
           --dns-name-label usuarios-development \
@@ -81,3 +81,17 @@ steps:
       LOG_MICROSOFT: $(Logging__LogLevel__Microsoft)
       LOG_MICROSOFT_AI: $(Logging__LogLevel__Microsoft.ApplicationInsights)
       LOG_MICROSOFT_LIFETIME: $(Logging__LogLevel__Microsoft.Hosting.Lifetime)
+
+  - task: AzureCLI@2
+    displayName: Verificar status do container
+    inputs:
+      azureSubscription: 'fcgrm-connection'
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "Consultando status da instância 'usuarios-development'..."
+        az container show \
+          --resource-group FCG-RG \
+          --name usuarios-development \
+          --query "instanceView.state" \
+          --output tsv
