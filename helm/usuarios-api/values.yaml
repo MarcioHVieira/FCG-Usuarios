@@ -1,0 +1,51 @@
+replicaCount: 1
+
+image:
+  repository: fcgcr.azurecr.io/fcgcr-repo
+  tag: Usuarios-Production-latest
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  port: 80
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
+
+env:
+  DOTNET_ENVIRONMENT: Production
+
+JwtSettings:
+  Issuer: "FCG.Api"
+  Audience: "FCG.Clients"
+  ExpirationMinutes: 60
+
+Logging:
+  LogLevel:
+    Default: "Trace"
+    Microsoft:
+      ApplicationInsights: "Information"
+      Hosting:
+        Lifetime: "Information"
+
+EmailSettings:
+  SmtpServer: "smtp.gmail.com"
+  SmtpPort: 587
+  SmtpUser: "marciohenriquev@gmail.com"
+
+# Valores sensíveis definidos via Kubernetes Secret:
+# - EmailSettings__SmtpPassword
+# - ApplicationInsights__ConnectionString
+# - ConnectionStrings__DefaultConnection
+# - JwtSettings__SecretKey
