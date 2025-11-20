@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usuarios-api
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: usuarios-api
+  template:
+    metadata:
+      labels:
+        app: usuarios-api
+    spec:
+      containers:
+        - name: usuarios-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: DOTNET_ENVIRONMENT
+              value: "{{ .Values.env.DOTNET_ENVIRONMENT }}"
+
+            # Dados sensíveis via Secret
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: usuarios-api-secrets
+                  key: ConnectionStrings__DefaultConnection
+            - name: JwtSettings__SecretKey
+              valueFrom:
+                secretKeyRef:
+                  name: usuarios-api-secrets
+                  key: JwtSettings__SecretKey
+            - name: EmailSettings__SmtpPassword
+              valueFrom:
+                secretKeyRef:
+                  name: usuarios-api-secrets
+                  key: EmailSettings__SmtpPassword
+            - name: ApplicationInsights__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: usuarios-api-secrets
+                  key: ApplicationInsights__ConnectionString
+
+            # Valores públicos via Helm
+            - name: Logging__LogLevel__Default
+              value: "{{ .Values.Logging.LogLevel.Default }}"
+            - name: Logging__LogLevel__Microsoft
+              value: "{{ .Values.Logging.LogLevel.Microsoft }}"
+            - name: Logging__LogLevel__Microsoft.Hosting.Lifetime
+              value: "{{ index .Values.Logging.LogLevel "Microsoft.Hosting.Lifetime" }}"
+            - name: Logging__LogLevel__Microsoft.ApplicationInsights
+              value: "{{ index .Values.Logging.LogLevel "Microsoft.ApplicationInsights" }}"
+
+            - name: JwtSettings__Issuer
+              value: "{{ .Values.JwtSettings.Issuer }}"
+            - name: JwtSettings__Audience
+              value: "{{ .Values.JwtSettings.Audience }}"
+            - name: JwtSettings__ExpirationMinutes
+              value: "{{ .Values.JwtSettings.ExpirationMinutes }}"
+
+            - name: EmailSettings__SmtpServer
+              value: "{{ .Values.EmailSettings.SmtpServer }}"
+            - name: EmailSettings__SmtpPort
+              value: "{{ .Values.EmailSettings.SmtpPort }}"
+            - name: EmailSettings__SmtpUser
+              value: "{{ .Values.EmailSettings.SmtpUser }}"
+
+            - name: ApplicationInsights__EnableDebugLogger
+              value: "{{ .Values.ApplicationInsights.EnableDebugLogger }}"
+            - name: ApplicationInsights__EnableAdaptiveSampling
+              value: "{{ .Values.ApplicationInsights.EnableAdaptiveSampling }}"
+
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
